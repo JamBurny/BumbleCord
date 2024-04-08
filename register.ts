@@ -1,7 +1,11 @@
 import { REST, Routes } from "discord.js";
 import type { Command } from "./types.ts";
-import { Glob } from "bun";
-const glob = new Glob("**/*.ts");
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+
+import { Glob } from "glob";
+
+const g = new Glob("commands/**.ts", {});
 
 const TOKEN: string = process.env.TOKEN as string;
 const CLIENT_ID: string = process.env.CLIENT_ID as string;
@@ -12,9 +16,9 @@ const registerCommands: (
 ) => Promise<Command[]> = async (CLIENT_ID, TOKEN) => {
     let commandList: Command[] = [];
 
-    for await (const file of glob.scan("./commands")) {
+    for await (const file of g) {
         console.log(file); // => "index.ts"
-        let command = require("./commands/" + file).default as Command;
+        let command = (await require(".\\" + file)).default as Command;
         commandList.push(command);
     }
 

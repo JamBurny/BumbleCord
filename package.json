@@ -3,15 +3,19 @@
     "module": "index.ts",
     "type": "module",
     "scripts": {
-        "start": "bun run index.ts"
+        "start": "npx tsx index.ts",
+        "dev": "npx tsx index.ts"
     },
     "devDependencies": {
-        "@types/bun": "latest"
+        "@types/node": "latest",
+        "tsx": "^4.7.2"
     },
     "peerDependencies": {
         "typescript": "^5.0.0"
     },
     "dependencies": {
-        "discord.js": "^14.14.1"
+        "discord.js": "^14.14.1",
+        "dotenv": "^16.4.5",
+        "glob": "^10.3.12"
     }
 }
