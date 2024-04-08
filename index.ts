@@ -1,8 +1,14 @@
-import { Client, GatewayIntentBits, Events } from "discord.js";
+import { Client, Events, GatewayIntentBits } from "discord.js";
 import type { Command } from "./types";
 import { registerCommands } from "./register.ts";
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+const client = new Client({
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.MessageContent,
+    ],
+});
 
 const CLIENT_ID: string = process.env.CLIENT_ID as string;
 const TOKEN: string = process.env.TOKEN as string;

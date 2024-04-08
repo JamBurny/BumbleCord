@@ -3,7 +3,7 @@ import type { Command } from "./types.ts";
 import { Glob } from "bun";
 const glob = new Glob("**/*.ts");
 
-const SECRET: string = process.env.SECRET as string;
+const TOKEN: string = process.env.TOKEN as string;
 const CLIENT_ID: string = process.env.CLIENT_ID as string;
 
 const registerCommands: (
