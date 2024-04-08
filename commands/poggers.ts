@@ -5,6 +5,7 @@ const command: Command = {
     name: "poggers",
     description: "test command!",
     execute: async (interaction: Interaction<CacheType>) => {
+        console.log(interaction.type);
         if (!interaction.isChatInputCommand()) return;
         if (interaction.commandName !== command.name) return;
 
