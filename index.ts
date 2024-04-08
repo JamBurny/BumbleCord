@@ -1,8 +1,6 @@
 import { Client, GatewayIntentBits, Events } from "discord.js";
 import type { Command } from "./types";
 import { registerCommands } from "./register.ts";
-import { Glob } from "bun";
-const glob = new Glob("**/*.ts");
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
@@ -15,14 +13,7 @@ client.once(Events.ClientReady, () => {
     }
 });
 
-let commandList: Command[] = [];
-for await (const file of glob.scan("./commands")) {
-    console.log(file); // => "index.ts"
-    let command = require("./commands/" + file).default as Command;
-    commandList.push(command);
-}
-
-registerCommands(commandList, CLIENT_ID, TOKEN);
+let commandList: Command[] = await registerCommands(CLIENT_ID, TOKEN);
 
 client.on(Events.InteractionCreate, async (interaction) => {
     for (let command of commandList) {
