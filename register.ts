@@ -1,27 +1,27 @@
 import { REST, Routes } from "discord.js";
+import type { Command } from "./types.ts";
 
 const SECRET: string = process.env.SECRET as string;
 const CLIENT_ID: string = process.env.CLIENT_ID as string;
 
-console.log(SECRET, CLIENT_ID);
+const registerCommands = async (
+    commands: Command[],
+    CLIENT_ID: string,
+    TOKEN: string
+) => {
+    const rest = new REST({ version: "10" }).setToken(TOKEN);
 
-const commands = [
-    {
-        name: "ping",
-        description: "Replies with Pong!",
-    },
-];
+    try {
+        console.log("Started refreshing application (/) commands.");
 
-const rest = new REST({ version: "10" }).setToken(SECRET);
+        await rest.put(Routes.applicationCommands(CLIENT_ID), {
+            body: commands,
+        });
 
-try {
-    console.log("Started refreshing application (/) commands.");
+        console.log("Successfully reloaded application (/) commands.");
+    } catch (error) {
+        console.error(error);
+    }
+};
 
-    await rest.put(Routes.applicationCommands(CLIENT_ID), {
-        body: commands,
-    });
-
-    console.log("Successfully reloaded application (/) commands.");
-} catch (error) {
-    console.error(error);
-}
+export { registerCommands };
