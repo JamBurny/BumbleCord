@@ -17,7 +17,6 @@ const registerCommands: (
     let commandList: Command[] = [];
 
     for await (const file of g) {
-        console.log(file); // => "index.ts"
         let command = (await require("./" + file)).default as Command;
         commandList.push(command);
     }

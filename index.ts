@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 dotenv.config();
 import type { Command } from "./types";
 import { registerCommands } from "./register.ts";
+import { joinVoiceChannel, getVoiceConnection } from "@discordjs/voice";
 
 const client = new Client({
     intents: [
@@ -30,12 +31,21 @@ client.on(Events.InteractionCreate, async (interaction) => {
         await command.execute(interaction);
     }
 });
-let con: any;
 client.on(Events.VoiceStateUpdate, async (oldState, newState) => {
-    console.log(newState.channel?.name);
-    console.log(newState.member?.displayName);
+    if (newState.member?.user.bot) return;
     if (newState.channel?.id) {
-        console.log("Yes");
+        if (
+            !getVoiceConnection(newState.guild.id) ||
+            getVoiceConnection(newState.guild.id)?.joinConfig.channelId !==
+                newState.channel.id
+        )
+            joinVoiceChannel({
+                channelId: newState.channel.id,
+                guildId: newState.guild.id,
+                adapterCreator: newState.guild.voiceAdapterCreator,
+            });
+    } else {
+        getVoiceConnection(newState.guild.id)?.destroy();
     }
 });
 
