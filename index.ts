@@ -3,7 +3,15 @@ import dotenv from "dotenv";
 dotenv.config();
 import type { Command } from "./types";
 import { registerCommands } from "./register.ts";
-import { joinVoiceChannel, getVoiceConnection } from "@discordjs/voice";
+import {
+    joinVoiceChannel,
+    getVoiceConnection,
+    EndBehaviorType,
+} from "@discordjs/voice";
+
+const { OpusEncoder } = require("@discordjs/opus");
+
+const encoder = new OpusEncoder(48000, 2);
 
 const client = new Client({
     intents: [
@@ -38,12 +46,32 @@ client.on(Events.VoiceStateUpdate, async (oldState, newState) => {
             !getVoiceConnection(newState.guild.id) ||
             getVoiceConnection(newState.guild.id)?.joinConfig.channelId !==
                 newState.channel.id
-        )
-            joinVoiceChannel({
+        ) {
+            let channel = joinVoiceChannel({
                 channelId: newState.channel.id,
                 guildId: newState.guild.id,
                 adapterCreator: newState.guild.voiceAdapterCreator,
+                selfDeaf: false,
             });
+            let receiver = channel.receiver.subscribe(
+                newState.member?.id as string,
+                {
+                    end: {
+                        behavior: EndBehaviorType.AfterSilence,
+                        duration: 100,
+                    },
+                }
+            );
+
+            // console.log(receiver);
+
+            // const stream = receiver
+            //     .pipe(decoder)
+            //     .pipe(createWriteStream("./test.pcm"));
+            // stream.on("finish", () => {
+            //     exec("ffmpeg -y -f s16le -ar 48k -ac 2 -i test.pcm test.mp3");
+            // });
+        }
     } else {
         getVoiceConnection(newState.guild.id)?.destroy();
     }
