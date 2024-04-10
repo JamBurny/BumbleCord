@@ -131,4 +131,5 @@ dist
 
 
 # Everthing else
-recordings/
+recordings/*
+!recordings/.gitkeep
