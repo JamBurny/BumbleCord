@@ -1,14 +1,13 @@
-import { REST, Routes } from "discord.js";
-import type { Command } from "./types.ts";
+import { ApplicationCommand, REST, Routes } from "discord.js";
+import type { Command, CommandArgument } from "./types.ts";
 import { createRequire } from "module";
-const require = createRequire(import.meta.url);
-
 import { Glob } from "glob";
 
-const g = new Glob("commands/**.ts", {});
+const require = createRequire(import.meta.url);
 
 const TOKEN: string = process.env.TOKEN as string;
 const CLIENT_ID: string = process.env.CLIENT_ID as string;
+const GLOB = new Glob("commands/**.ts", {});
 
 const registerCommands: (
     CLIENT_ID: string,
@@ -16,7 +15,7 @@ const registerCommands: (
 ) => Promise<Command[]> = async (CLIENT_ID, TOKEN) => {
     let commandList: Command[] = [];
 
-    for await (const file of g) {
+    for await (const file of GLOB) {
         let command = (await require("./" + file)).default as Command;
         commandList.push(command);
     }
@@ -26,9 +25,13 @@ const registerCommands: (
     try {
         console.log("Started refreshing application (/) commands.");
 
-        await rest.put(Routes.applicationCommands(CLIENT_ID), {
-            body: commandList,
-        });
+        await rest
+            .put(Routes.applicationCommands(CLIENT_ID), {
+                body: commandList,
+            })
+            .then((response) => {
+                // console.log(response);
+            });
 
         console.log("Successfully reloaded application (/) commands.");
     } catch (error) {
