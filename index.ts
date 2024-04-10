@@ -1,17 +1,10 @@
-import { Client, Events, GatewayIntentBits } from "discord.js";
+import { Client, Events, GatewayIntentBits, GuildMember } from "discord.js";
 import dotenv from "dotenv";
 dotenv.config();
 import type { Command } from "./types";
 import { registerCommands } from "./register.ts";
-import {
-    joinVoiceChannel,
-    getVoiceConnection,
-    EndBehaviorType,
-} from "@discordjs/voice";
-
-// import { OpusEncoder } from "@discordjs/opus";
-
-// const encoder = new OpusEncoder(48000, 2);
+import { joinVoiceChannel, getVoiceConnection } from "@discordjs/voice";
+import { createRecorder } from "./src/createRecorder.ts";
 
 const client = new Client({
     intents: [
@@ -39,44 +32,32 @@ client.on(Events.InteractionCreate, async (interaction) => {
         await command.execute(interaction);
     }
 });
-
-// // Follow user in voice channel
-// client.on(Events.VoiceStateUpdate, async (oldState, newState) => {
-//     if (newState.member?.user.bot) return;
-//     if (newState.channel?.id) {
-//         if (
-//             !getVoiceConnection(newState.guild.id) ||
-//             getVoiceConnection(newState.guild.id)?.joinConfig.channelId !==
-//                 newState.channel.id
-//         ) {
-//             let channel = joinVoiceChannel({
-//                 channelId: newState.channel.id,
-//                 guildId: newState.guild.id,
-//                 adapterCreator: newState.guild.voiceAdapterCreator,
-//                 selfDeaf: false,
-//             });
-//             let receiver = channel.receiver.subscribe(
-//                 newState.member?.id as string,
-//                 {
-//                     end: {
-//                         behavior: EndBehaviorType.AfterSilence,
-//                         duration: 100,
-//                     },
-//                 }
-//             );
-
-//             // console.log(receiver);
-
-//             // const stream = receiver
-//             //     .pipe(decoder)
-//             //     .pipe(createWriteStream("./test.pcm"));
-//             // stream.on("finish", () => {
-//             //     exec("ffmpeg -y -f s16le -ar 48k -ac 2 -i test.pcm test.mp3");
-//             // });
-//         }
-//     } else {
-//         getVoiceConnection(newState.guild.id)?.destroy();
-//     }
-// });
+client.on(Events.VoiceStateUpdate, async (oldState, newState) => {
+    console.log(newState.member?.presence?.status);
+    if (!newState.member) return;
+    if (newState.member?.user.bot) return;
+    newState.guild.commands.fetch();
+    if (newState.channel?.id) {
+        if (
+            !getVoiceConnection(newState.guild.id) ||
+            getVoiceConnection(newState.guild.id)?.joinConfig.channelId !==
+                newState.channel.id
+        ) {
+            let channel = joinVoiceChannel({
+                channelId: newState.channel.id,
+                guildId: newState.guild.id,
+                adapterCreator: newState.guild.voiceAdapterCreator,
+                selfDeaf: false,
+            });
+            let member = newState.member;
+            let receiver = channel.receiver;
+            receiver.speaking.on("start", () => {
+                createRecorder(channel.receiver, member);
+            });
+        }
+    } else {
+        getVoiceConnection(newState.guild.id)?.destroy();
+    }
+});
 
 client.login(TOKEN);
