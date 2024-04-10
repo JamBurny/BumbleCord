@@ -1,10 +1,9 @@
 import type { Interaction, CacheType } from "discord.js";
 import type { CommandArgument, Command } from "../types.ts";
 import { ApplicationCommandOptionType } from "discord.js";
-import * as consent from "../consent.json";
 import * as fs from "fs";
 
-const consentFile = "./consent.json";
+const consentFilePath = "./consent.json";
 
 const command: Command = {
     name: "consent",
@@ -18,7 +17,7 @@ const command: Command = {
 
         // check
         if (subcommand === "check") {
-            var consent = checkConsent(parseInt(interaction.user.id));
+            var consent = checkConsent(interaction.user.id);
             interaction.reply(
                 "Your current consent status is: **" + consent + "**"
             );
@@ -29,6 +28,7 @@ const command: Command = {
             var value = interaction.options.getString("value");
             switch (value) {
                 case "granted":
+                    addConsent(interaction.user.id);
                     console.log(
                         `${displayName} has granted consent for Bumblebee to record their voice`
                     );
@@ -37,6 +37,7 @@ const command: Command = {
                     );
                     break;
                 case "denied":
+                    removeConsent(interaction.user.id);
                     console.log(
                         `${displayName} has denied consent for Bumblebee to record their voice`
                     );
@@ -76,16 +77,26 @@ const command: Command = {
     ],
 };
 
-const checkConsent = (userId: number): boolean => {
+const checkConsent = (checkUserId: string): boolean => {
+    var consent = JSON.parse(fs.readFileSync(consentFilePath, "utf8"));
     for (var i in consent["users"]) {
-        var user = consent["users"][i];
-        if (user === userId) return true;
+        var curUserId = consent["users"][i];
+        if (curUserId === checkUserId) return true;
     }
     return false;
 };
 
-const addConsent = (userId: number): void => {};
+const addConsent = (userId: string): void => {
+    var consent = JSON.parse(fs.readFileSync(consentFilePath, "utf-8"));
+    consent["users"].push(userId);
+    fs.writeFileSync(consentFilePath, JSON.stringify(consent));
+};
 
-const removeConsent = (userId: number): void => {};
-
+const removeConsent = (userId: string): void => {
+    var consent = JSON.parse(fs.readFileSync(consentFilePath, "utf-8"));
+    consent["users"] = consent["users"].filter(
+        (curUserId: string) => curUserId !== userId
+    );
+    fs.writeFileSync(consentFilePath, JSON.stringify(consent));
+};
 export default command;

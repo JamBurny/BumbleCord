@@ -133,3 +133,4 @@ dist
 # Everthing else
 recordings/*
 !recordings/.gitkeep
+consent.json
