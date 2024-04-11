@@ -17,12 +17,9 @@ const command: Command = {
         if (interaction.commandName !== command.name) return;
         var subcommand = interaction.options.getSubcommand();
 
-        // check
         if (subcommand === "check") {
             handleCheckConsent(interaction);
         }
-
-        // update
         if (subcommand === "update") {
             handleUpdateConsent(interaction);
         }
