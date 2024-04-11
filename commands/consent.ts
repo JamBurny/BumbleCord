@@ -1,4 +1,8 @@
-import type { Interaction, CacheType } from "discord.js";
+import type {
+    Interaction,
+    CacheType,
+    ChatInputCommandInteraction,
+} from "discord.js";
 import type { CommandArgument, Command } from "../types.ts";
 import { ApplicationCommandOptionType } from "discord.js";
 import * as fs from "fs";
@@ -11,55 +15,16 @@ const command: Command = {
     execute: async (interaction: Interaction<CacheType>) => {
         if (!interaction.isChatInputCommand()) return;
         if (interaction.commandName !== command.name) return;
-
-        var displayName = interaction.user.displayName;
         var subcommand = interaction.options.getSubcommand();
 
         // check
         if (subcommand === "check") {
-            var interactionUser = interaction.user;
-            var queryUser = interaction.options.getUser("user");
-            if (queryUser === null) {
-                queryUser = interactionUser;
-            }
-            console.log(
-                `${interactionUser.displayName} is checking consent for ${queryUser.displayName}`
-            );
-            var consent = checkConsent(queryUser.id);
-            interaction.reply({
-                content: `${queryUser.globalName}'s consent status is: **${consent}**`,
-                ephemeral: true,
-            });
+            handleCheckConsent(interaction);
         }
 
         // update
         if (subcommand === "update") {
-            var value = interaction.options.getString("value");
-            switch (value) {
-                case "granted":
-                    addConsent(interaction.user.id);
-                    console.log(
-                        `${displayName} has granted consent for Bumblebee to record their voice`
-                    );
-                    interaction.reply({
-                        content:
-                            "Consent granted: Bumblebee will now record your voice",
-                        ephemeral: true,
-                    });
-                    "Consent granted: Bumblebee will now record your voice";
-                    break;
-                case "denied":
-                    removeConsent(interaction.user.id);
-                    console.log(
-                        `${displayName} has denied consent for Bumblebee to record their voice`
-                    );
-                    interaction.reply({
-                        content:
-                            "Consent denied: Bumblebee will no longer record your voice",
-                        ephemeral: true,
-                    });
-                    break;
-            }
+            handleUpdateConsent(interaction);
         }
     },
     options: [
@@ -97,6 +62,53 @@ const command: Command = {
             ],
         },
     ],
+};
+
+const handleCheckConsent = (
+    interaction: ChatInputCommandInteraction<CacheType>
+): void => {
+    var interactionUser = interaction.user;
+    var queryUser = interaction.options.getUser("user");
+    if (queryUser === null) {
+        queryUser = interactionUser;
+    }
+    console.log(
+        `${interactionUser.displayName} is checking consent for ${queryUser.displayName}`
+    );
+    var consent = checkConsent(queryUser.id);
+    interaction.reply({
+        content: `${queryUser.globalName}'s consent status is: **${consent}**`,
+        ephemeral: true,
+    });
+};
+
+const handleUpdateConsent = (
+    interaction: ChatInputCommandInteraction<CacheType>
+): void => {
+    var updateValue = interaction.options.getString("value");
+    var displayName = interaction.user.displayName;
+
+    if (updateValue === "granted") {
+        addConsent(interaction.user.id);
+        console.log(
+            `${displayName} has granted consent for Bumblebee to record their voice`
+        );
+        interaction.reply({
+            content: "Consent granted: Bumblebee will now record your voice",
+            ephemeral: true,
+        });
+        ("Consent granted: Bumblebee will now record your voice");
+    } else if (updateValue === "denied") {
+        removeConsent(interaction.user.id);
+        console.log(
+            `${displayName} has denied consent for Bumblebee to record their voice`
+        );
+        interaction.reply({
+            content:
+                "Consent denied: Bumblebee will no longer record your voice",
+            ephemeral: true,
+        });
+    }
 };
 
 const checkConsent = (checkUserId: string): boolean => {
