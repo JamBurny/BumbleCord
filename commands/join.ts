@@ -5,9 +5,16 @@ import {
     Guild,
     GuildMember,
     ApplicationCommandOptionType,
+    VoiceState,
+    type Channel,
+    type VoiceBasedChannel,
+    GuildChannel,
+    ChannelType,
 } from "discord.js";
 import type { Command } from "../types.ts";
 import { joinVoiceChannel } from "@discordjs/voice";
+import { join } from "path";
+import { Channel } from "diagnostics_channel";
 
 const command: Command = {
     name: "join",
@@ -26,30 +33,65 @@ const command: Command = {
 
         const member = interaction.member as GuildMember;
 
-        const voiceState = member.voice;
+        var argChannel = interaction.options.getChannel(
+            "channel"
+        ) as GuildChannel;
 
-        if (voiceState.channel === null) {
+        // If the channel is not a voice channel, error
+        if (argChannel && argChannel.type !== ChannelType.GuildVoice) {
             interaction.reply({
-                content:
-                    "You need to be in a voice channel to use this command",
+                content: "The channel you provided is not a voice channel",
                 ephemeral: true,
             });
             return;
         }
+
+        // If the user provided a channel, join that channel
+        if (argChannel) {
+            console.log(
+                `${interaction.user.toString()} asked Bumblebee to join ${
+                    argChannel.name
+                }`
+            );
+            interaction.reply({
+                content: `Joining ${argChannel.name}`,
+                ephemeral: true,
+            });
+            joinVoiceChannel({
+                channelId: argChannel.id,
+                guildId: argChannel.guild.id,
+                adapterCreator: argChannel.guild.voiceAdapterCreator,
+            });
+            return;
+        }
+
+        // If the user did not provide a channel and is not in a channel, error
+        if (!member.voice.channel) {
+            interaction.reply({
+                content:
+                    "You must to be in a voice channel or provide a channel for Bumblebee to join to use this command",
+                ephemeral: true,
+            });
+            return;
+        }
+
+        // If the user did not provide a channel, join the channel they are in
+        var joinChannel = member.voice.channel as VoiceBasedChannel;
         console.log(
             `${interaction.user.toString()} asked Bumblebee to join ${
-                voiceState.channel.name
+                joinChannel.name
             }`
         );
         interaction.reply({
-            content: `Joining ${voiceState.channel.name}`,
+            content: `Joining ${joinChannel.name}`,
             ephemeral: true,
         });
         joinVoiceChannel({
-            channelId: voiceState.channel.id,
-            guildId: voiceState.guild.id,
-            adapterCreator: voiceState.guild.voiceAdapterCreator,
+            channelId: joinChannel.id,
+            guildId: joinChannel.guild.id,
+            adapterCreator: joinChannel.guild.voiceAdapterCreator,
         });
+        return;
     },
 };
 
