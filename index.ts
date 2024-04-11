@@ -1,4 +1,4 @@
-import { Client, Events, GatewayIntentBits, GuildMember } from "discord.js";
+import { Client, Events, GatewayIntentBits } from "discord.js";
 import dotenv from "dotenv";
 dotenv.config();
 import type { Command } from "./types";
