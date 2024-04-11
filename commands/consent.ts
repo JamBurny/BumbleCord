@@ -2,6 +2,7 @@ import type {
     Interaction,
     CacheType,
     ChatInputCommandInteraction,
+    User,
 } from "discord.js";
 import type { CommandArgument, Command } from "../types.ts";
 import { ApplicationCommandOptionType } from "discord.js";
@@ -15,8 +16,8 @@ const command: Command = {
     execute: async (interaction: Interaction<CacheType>) => {
         if (!interaction.isChatInputCommand()) return;
         if (interaction.commandName !== command.name) return;
-        var subcommand = interaction.options.getSubcommand();
 
+        var subcommand = interaction.options.getSubcommand();
         if (subcommand === "check") {
             handleCheckConsent(interaction);
         }
@@ -64,17 +65,16 @@ const command: Command = {
 const handleCheckConsent = (
     interaction: ChatInputCommandInteraction<CacheType>
 ): void => {
-    var interactionUser = interaction.user;
     var queryUser = interaction.options.getUser("user");
     if (queryUser === null) {
-        queryUser = interactionUser;
+        queryUser = interaction.user;
     }
     console.log(
-        `${interactionUser.displayName} is checking consent for ${queryUser.displayName}`
+        `${interaction.user.toString()} is checking consent for ${queryUser.toString()}`
     );
-    var consent = checkConsent(queryUser.id);
+    var consent = checkConsent(queryUser);
     interaction.reply({
-        content: `${queryUser.globalName}'s consent status is: **${consent}**`,
+        content: `${queryUser.toString()}'s consent status is: **${consent}**`,
         ephemeral: true,
     });
 };
@@ -86,9 +86,9 @@ const handleUpdateConsent = (
     var displayName = interaction.user.displayName;
 
     if (updateValue === "granted") {
-        addConsent(interaction.user.id);
+        addConsent(interaction.user);
         console.log(
-            `${displayName} has granted consent for Bumblebee to record their voice`
+            `${interaction.user.toString()} has granted consent for Bumblebee to record their voice`
         );
         interaction.reply({
             content: "Consent granted: Bumblebee will now record your voice",
@@ -96,9 +96,9 @@ const handleUpdateConsent = (
         });
         ("Consent granted: Bumblebee will now record your voice");
     } else if (updateValue === "denied") {
-        removeConsent(interaction.user.id);
+        removeConsent(interaction.user);
         console.log(
-            `${displayName} has denied consent for Bumblebee to record their voice`
+            `${interaction.user.toString()} has denied consent for Bumblebee to record their voice`
         );
         interaction.reply({
             content:
@@ -108,25 +108,25 @@ const handleUpdateConsent = (
     }
 };
 
-const checkConsent = (checkUserId: string): boolean => {
+const checkConsent = (user: User): boolean => {
     var consent = JSON.parse(fs.readFileSync(consentFilePath, "utf8"));
     for (var i in consent["users"]) {
-        var curUserId = consent["users"][i];
-        if (curUserId === checkUserId) return true;
+        var curUser = consent["users"][i];
+        if (curUser === user.toString()) return true;
     }
     return false;
 };
 
-const addConsent = (userId: string): void => {
+const addConsent = (user: User): void => {
     var consent = JSON.parse(fs.readFileSync(consentFilePath, "utf-8"));
-    consent["users"].push(userId);
+    consent["users"].push(user.toString());
     fs.writeFileSync(consentFilePath, JSON.stringify(consent));
 };
 
-const removeConsent = (userId: string): void => {
+const removeConsent = (user: User): void => {
     var consent = JSON.parse(fs.readFileSync(consentFilePath, "utf-8"));
     consent["users"] = consent["users"].filter(
-        (curUserId: string) => curUserId !== userId
+        (curUser: string) => curUser !== user.toString()
     );
     fs.writeFileSync(consentFilePath, JSON.stringify(consent));
 };
