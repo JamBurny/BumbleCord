@@ -11,7 +11,8 @@ const command: Command = {
 
         var botMember = interaction.guild.members.me;
         var voiceState = botMember?.voice;
-        if (!voiceState?.sessionId) {
+
+        if (!voiceState?.channel) {
             interaction.reply({
                 content: "I am not in a voice channel",
                 ephemeral: true,
