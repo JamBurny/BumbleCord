@@ -1,20 +1,13 @@
 import {
     type Interaction,
-    type CacheType,
-    userMention,
-    Guild,
     GuildMember,
     ApplicationCommandOptionType,
-    VoiceState,
-    type Channel,
     type VoiceBasedChannel,
     GuildChannel,
     ChannelType,
 } from "discord.js";
 import type { Command } from "../types.ts";
 import { joinVoiceChannel } from "@discordjs/voice";
-import { join } from "path";
-import { Channel } from "diagnostics_channel";
 
 const command: Command = {
     name: "join",
