@@ -1,4 +1,5 @@
 import type { Command } from "../types.ts";
+import { getVoiceConnection } from "@discordjs/voice";
 
 const command: Command = {
     name: "leave",
@@ -9,8 +10,8 @@ const command: Command = {
         if (!interaction.guild) return;
 
         var botMember = interaction.guild.members.me;
-        var voiceConnection = botMember?.voice;
-        if (!voiceConnection?.sessionId) {
+        var voiceState = botMember?.voice;
+        if (!voiceState?.sessionId) {
             interaction.reply({
                 content: "I am not in a voice channel",
                 ephemeral: true,
@@ -21,7 +22,7 @@ const command: Command = {
             content: "Leaving voice channel",
             ephemeral: true,
         });
-        voiceConnection.disconnect();
+        getVoiceConnection(voiceState.guild.id)?.destroy();
     },
 };
 

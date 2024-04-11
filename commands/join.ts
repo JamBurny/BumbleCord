@@ -54,6 +54,7 @@ const command: Command = {
                 channelId: argChannel.id,
                 guildId: argChannel.guild.id,
                 adapterCreator: argChannel.guild.voiceAdapterCreator,
+                selfMute: false,
             });
             return;
         }
@@ -83,6 +84,7 @@ const command: Command = {
             channelId: joinChannel.id,
             guildId: joinChannel.guild.id,
             adapterCreator: joinChannel.guild.voiceAdapterCreator,
+            selfMute: false,
         });
         return;
     },

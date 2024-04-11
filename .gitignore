@@ -131,6 +131,7 @@ dist
 
 
 # Everthing else
+.DS_STORE
 recordings/*
 !recordings/.gitkeep
 consent.json

@@ -33,7 +33,6 @@ client.on(Events.InteractionCreate, async (interaction) => {
     }
 });
 client.on(Events.VoiceStateUpdate, async (oldState, newState) => {
-    console.log(newState.member?.presence?.status);
     if (!newState.member) return;
     if (newState.member?.user.bot) return;
     newState.guild.commands.fetch();
