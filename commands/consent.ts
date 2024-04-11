@@ -17,8 +17,6 @@ const command: Command = {
 
         // check
         if (subcommand === "check") {
-            var consent;
-
             var interactionUser = interaction.user;
             var queryUser = interaction.options.getUser("user");
             if (queryUser === null) {
@@ -27,10 +25,11 @@ const command: Command = {
             console.log(
                 `${interactionUser.displayName} is checking consent for ${queryUser.displayName}`
             );
-            consent = checkConsent(queryUser.id);
-            interaction.reply(
-                `${queryUser.globalName}'s consent status is: **${consent}**`
-            );
+            var consent = checkConsent(queryUser.id);
+            interaction.reply({
+                content: `${queryUser.globalName}'s consent status is: **${consent}**`,
+                ephemeral: true,
+            });
         }
 
         // update
@@ -42,18 +41,23 @@ const command: Command = {
                     console.log(
                         `${displayName} has granted consent for Bumblebee to record their voice`
                     );
-                    interaction.reply(
-                        "Consent granted: Bumblebee will now record your voice"
-                    );
+                    interaction.reply({
+                        content:
+                            "Consent granted: Bumblebee will now record your voice",
+                        ephemeral: true,
+                    });
+                    "Consent granted: Bumblebee will now record your voice";
                     break;
                 case "denied":
                     removeConsent(interaction.user.id);
                     console.log(
                         `${displayName} has denied consent for Bumblebee to record their voice`
                     );
-                    interaction.reply(
-                        "Consent denied: Bumblebee will no longer record your voice"
-                    );
+                    interaction.reply({
+                        content:
+                            "Consent denied: Bumblebee will no longer record your voice",
+                        ephemeral: true,
+                    });
                     break;
             }
         }
