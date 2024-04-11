@@ -17,9 +17,19 @@ const command: Command = {
 
         // check
         if (subcommand === "check") {
-            var consent = checkConsent(interaction.user.id);
+            var consent;
+
+            var interactionUser = interaction.user;
+            var queryUser = interaction.options.getUser("user");
+            if (queryUser === null) {
+                queryUser = interactionUser;
+            }
+            console.log(
+                `${interactionUser.displayName} is checking consent for ${queryUser.displayName}`
+            );
+            consent = checkConsent(queryUser.id);
             interaction.reply(
-                "Your current consent status is: **" + consent + "**"
+                `${queryUser.globalName}'s consent status is: **${consent}**`
             );
         }
 
@@ -54,6 +64,14 @@ const command: Command = {
             description:
                 "Review your consent for Bumblebee to record your voice",
             type: ApplicationCommandOptionType.Subcommand,
+            options: [
+                {
+                    name: "user",
+                    description: "The user to check consent for",
+                    type: ApplicationCommandOptionType.User,
+                    required: false,
+                },
+            ],
         },
         {
             name: "update",
